@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Verse Image Maker</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f3f0e9;
+      --surface: #fffdf8;
+      --surface-2: #ebe6dc;
+      --text: #1d2722;
+      --muted: #5a645e;
+      --line: #d4cec2;
+      --accent: #2d6551;
+      --accent-strong: #184735;
+      --accent-text: #ffffff;
+      --focus: #27856a;
+      --shadow: 0 20px 55px rgba(35, 43, 38, .12);
+      --soft-shadow: 0 6px 24px rgba(35, 43, 38, .08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #151916;
+        --surface: #1d231f;
+        --surface-2: #292f2a;
+        --text: #f4f0e8;
+        --muted: #b9c0b9;
+        --line: #3a433c;
+        --accent: #8ecbb3;
+        --accent-strong: #b0e0cb;
+        --accent-text: #10251c;
+        --focus: #a3dcc5;
+        --shadow: 0 22px 60px rgba(0, 0, 0, .34);
+        --soft-shadow: 0 6px 22px rgba(0, 0, 0, .22);
+      }
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 320px; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(90deg, transparent 49.9%, rgba(52,75,64,.035) 50%, transparent 50.1%),
+        var(--bg);
+      color: var(--text);
+      font-family: "DM Sans", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, textarea, select { font: inherit; }
+    button { color: inherit; }
+    .page {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: 40px clamp(18px, 4vw, 64px) 56px;
+    }
+    .intro {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 28px;
+      margin: 0 0 32px;
+    }
+    .intro-copy { max-width: 680px; }
+    h1 {
+      font-family: "Libre Baskerville", serif;
+      font-size: clamp(2rem, 4.3vw, 4.25rem);
+      line-height: 1.05;
+      letter-spacing: -.045em;
+      margin: 0 0 12px;
+      font-weight: 400;
+    }
+    .intro p {
+      color: var(--muted);
+      margin: 0;
+      font-size: clamp(1rem, 1.4vw, 1.12rem);
+      line-height: 1.6;
+    }
+    .steps {
+      flex: 0 0 auto;
+      display: flex;
+      gap: 7px;
+      color: var(--muted);
+      font-size: .83rem;
+      font-weight: 600;
+    }
+    .steps span { display: flex; align-items: center; gap: 7px; }
+    .steps span:not(:last-child)::after { content: "—"; color: var(--line); }
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(330px, 430px) minmax(0, 1fr);
+      gap: clamp(28px, 4vw, 62px);
+      align-items: start;
+    }
+    .editor {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: var(--soft-shadow);
+      border-radius: 14px 14px 4px 14px;
+      overflow: hidden;
+    }
+    .section {
+      padding: 22px;
+      border-bottom: 1px solid var(--line);
+    }
+    .section:last-child { border-bottom: 0; }
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: baseline;
+      margin: 0 0 14px;
+    }
+    .section-title h2 {
+      margin: 0;
+      font-size: .86rem;
+      line-height: 1;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .count { color: var(--muted); font-size: .78rem; }
+    label {
+      display: block;
+      font-size: .84rem;
+      font-weight: 600;
+      margin-bottom: 7px;
+    }
+    textarea, input[type="text"], select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--text);
+      border-radius: 7px;
+      outline: none;
+      transition: border-color .16s, box-shadow .16s;
+    }
+    textarea:focus, input[type="text"]:focus, select:focus {
+      border-color: var(--focus);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 20%, transparent);
+    }
+    textarea {
+      min-height: 132px;
+      padding: 13px 14px;
+      line-height: 1.55;
+      resize: vertical;
+    }
+    input[type="text"], select { height: 43px; padding: 0 12px; }
+    .field + .field { margin-top: 14px; }
+    .themes {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .theme {
+      appearance: none;
+      padding: 0;
+      border: 2px solid transparent;
+      background: none;
+      border-radius: 50%;
+      aspect-ratio: 1;
+      cursor: pointer;
+      position: relative;
+      transition: transform .15s, border-color .15s;
+    }
+    .theme::before {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      background: var(--swatch);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.1);
+    }
+    .theme:hover { transform: translateY(-2px); }
+    .theme[aria-pressed="true"] { border-color: var(--accent); }
+    .theme:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+    .theme .sr-only { position: absolute; }
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 12px;
+    }
+    .toggle-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      overflow: hidden;
+    }
+    .toggle-row button {
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: var(--bg);
+      padding: 9px 7px;
+      cursor: pointer;
+      min-height: 39px;
+    }
+    .toggle-row button:last-child { border-right: 0; }
+    .toggle-row button[aria-pressed="true"] {
+      background: var(--accent);
+      color: var(--accent-text);
+    }
+    .toggle-row button:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+    .size-help {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.45;
+    }
+    .preview-area { min-width: 0; }
+    .preview-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin: 0 0 12px;
+    }
+    .preview-label { font-weight: 700; font-size: .88rem; }
+    .dimensions { color: var(--muted); font-size: .8rem; }
+    .canvas-shell {
+      width: 100%;
+      min-height: 420px;
+      display: grid;
+      place-items: center;
+      padding: clamp(12px, 2.5vw, 30px);
+      background: color-mix(in srgb, var(--surface-2) 78%, transparent);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: 5px 18px 18px 18px;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      max-width: 100%;
+      max-height: min(68vh, 740px);
+      width: auto;
+      height: auto;
+      background: #1f3b31;
+      box-shadow: 0 18px 46px rgba(19, 27, 23, .22);
+    }
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .primary, .secondary {
+      border: 0;
+      min-height: 48px;
+      border-radius: 8px;
+      padding: 0 18px;
+      display: inline-flex;
+      gap: 9px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background .16s, transform .16s;
+    }
+    .primary { background: var(--accent); color: var(--accent-text); flex: 1; }
+    .primary:hover { background: var(--accent-strong); }
+    .primary:active, .secondary:active { transform: translateY(1px); }
+    .secondary { background: var(--surface); color: var(--text); border: 1px solid var(--line); }
+    .secondary:hover { background: var(--surface-2); }
+    .primary:focus-visible, .secondary:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+    .status {
+      min-height: 21px;
+      margin: 10px 2px 0;
+      color: var(--muted);
+      font-size: .82rem;
+      text-align: center;
+    }
+    svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .sr-only {
+      position: absolute !important;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0);
+      white-space: nowrap; border: 0;
+    }
+    @media (max-width: 900px) {
+      .page { padding-top: 28px; }
+      .intro { display: block; }
+      .steps { margin-top: 16px; }
+      .workspace { grid-template-columns: 1fr; }
+      .preview-area { order: -1; }
+      .canvas-shell { min-height: 0; padding: 14px; }
+      canvas { max-height: 62vh; }
+    }
+    @media (max-width: 520px) {
+      .page { padding: 23px 14px 38px; }
+      h1 { font-size: 2.35rem; letter-spacing: -.04em; }
+      .intro p { font-size: .98rem; }
+      .steps { font-size: .76rem; overflow: hidden; }
+      .workspace { gap: 22px; }
+      .canvas-shell { border-radius: 4px 12px 12px 12px; }
+      .section { padding: 18px 16px; }
+      .themes { gap: 7px; }
+      .controls-grid { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; }
+      .primary, .secondary { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="intro">
+      <div class="intro-copy">
+        <h1>Turn a verse into something worth sharing.</h1>
+        <p>Set the words, choose a mood, and download a crisp image for messages or social posts.</p>
+      </div>
+      <div class="steps" aria-label="Three steps">
+        <span>Write</span><span>Style</span><span>Download</span>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <form class="editor" id="editor" onsubmit="return false;">
+        <section class="section">
+          <div class="section-title">
+            <h2>Words</h2>
+            <span class="count" id="charCount">97 characters</span>
+          </div>
+          <div class="field">
+            <label for="verse">Verse text</label>
+            <textarea id="verse" maxlength="520" spellcheck="true">The LORD taketh pleasure in them that fear him, in those that hope in his mercy.</textarea>
+          </div>
+          <div class="field">
+            <label for="reference">Reference</label>
+            <input id="reference" type="text" maxlength="70" value="Psalm 147:11" />
+          </div>
+          <div class="field">
+            <label for="translation">Translation note <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+            <input id="translation" type="text" maxlength="32" value="KJV" placeholder="KJV, ESV, your paraphrase…" />
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><h2>Background</h2></div>
+          <div class="themes" role="group" aria-label="Background theme">
+            <button class="theme" type="button" data-theme="olive" aria-pressed="true" style="--swatch:linear-gradient(145deg,#e7dfbe 0 48%,#304e3e 49% 100%)"><span class="sr-only">Olive</span></button>
+            <button class="theme" type="button" data-theme="dawn" aria-pressed="false" style="--swatch:linear-gradient(145deg,#f2c8a3,#8d5b50)"><span class="sr-only">Dawn</span></button>
+            <button class="theme" type="button" data-theme="midnight" aria-pressed="false" style="--swatch:linear-gradient(145deg,#2a4561,#111d2d)"><span class="sr-only">Midnight</span></button>
+            <button class="theme" type="button" data-theme="paper" aria-pressed="false" style="--swatch:linear-gradient(145deg,#faf4e5,#d6bf91)"><span class="sr-only">Paper</span></button>
+            <button class="theme" type="button" data-theme="rose" aria-pressed="false" style="--swatch:linear-gradient(145deg,#ead3cc,#8b5352)"><span class="sr-only">Rose</span></button>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><h2>Layout</h2></div>
+          <div class="controls-grid">
+            <div>
+              <label for="format">Image shape</label>
+              <select id="format">
+                <option value="square">Square · 1080 × 1080</option>
+                <option value="portrait">Portrait · 1080 × 1350</option>
+                <option value="story">Story · 1080 × 1920</option>
+                <option value="wide">Wide · 1600 × 900</option>
+              </select>
+            </div>
+            <div>
+              <label for="fontStyle">Type style</label>
+              <select id="fontStyle">
+                <option value="classic">Classic serif</option>
+                <option value="clean">Clean sans</option>
+              </select>
+            </div>
+            <div style="grid-column:1/-1">
+              <label>Text alignment</label>
+              <div class="toggle-row" role="group" aria-label="Text alignment">
+                <button type="button" data-align="left" aria-pressed="true" aria-label="Align left">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M4 10h11M4 14h16M4 18h9"/></svg>
+                </button>
+                <button type="button" data-align="center" aria-pressed="false" aria-label="Align center">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M6.5 10h11M4 14h16M7.5 18h9"/></svg>
+                </button>
+                <button type="button" data-align="right" aria-pressed="false" aria-label="Align right">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M9 10h11M4 14h16M11 18h9"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <p class="size-help">Long verses resize automatically so the full text stays visible.</p>
+        </section>
+      </form>
+
+      <section class="preview-area" aria-label="Image preview">
+        <div class="preview-head">
+          <span class="preview-label">Preview</span>
+          <span class="dimensions" id="dimensions">1080 × 1080 PNG</span>
+        </div>
+        <div class="canvas-shell">
+          <canvas id="canvas" width="1080" height="1080" aria-label="Preview of your verse image"></canvas>
+        </div>
+        <div class="actions">
+          <button class="primary" id="download" type="button">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg>
+            Download PNG
+          </button>
+          <button class="secondary" id="reset" type="button">Reset design</button>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+  </main>
+
+<script>
+(function () {
+  'use strict';
+
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  var verse = document.getElementById('verse');
+  var reference = document.getElementById('reference');
+  var translation = document.getElementById('translation');
+  var format = document.getElementById('format');
+  var fontStyle = document.getElementById('fontStyle');
+  var charCount = document.getElementById('charCount');
+  var dimensions = document.getElementById('dimensions');
+  var status = document.getElementById('status');
+  var selectedTheme = 'olive';
+  var alignment = 'left';
+  var drawTimer;
+
+  var sizes = {
+    square: [1080, 1080],
+    portrait: [1080, 1350],
+    story: [1080, 1920],
+    wide: [1600, 900]
+  };
+
+  var themes = {
+    olive: { bg1: '#e8e0c2', bg2: '#d8ceb0', ink: '#203b30', accent: '#a45d3e', deep: '#365845', light: true },
+    dawn: { bg1: '#f3d6bd', bg2: '#c88470', ink: '#4b2929', accent: '#fff0db', deep: '#8f564e', light: true },
+    midnight: { bg1: '#182b42', bg2: '#0d1626', ink: '#f4eddd', accent: '#cba75d', deep: '#355a76', light: false },
+    paper: { bg1: '#faf5e8', bg2: '#e6d3aa', ink: '#362f25', accent: '#8b6337', deep: '#c4a66a', light: true },
+    rose: { bg1: '#ead6d0', bg2: '#b87e7d', ink: '#4f2d31', accent: '#fbefe3', deep: '#8b5658', light: true }
+  };
+
+  function mix(a, b, amount) {
+    function toRgb(hex) {
+      var v = hex.replace('#', '');
+      return [parseInt(v.slice(0,2),16), parseInt(v.slice(2,4),16), parseInt(v.slice(4,6),16)];
+    }
+    var x = toRgb(a), y = toRgb(b);
+    var r = x.map(function(n, i){ return Math.round(n + (y[i] - n) * amount); });
+    return 'rgb(' + r.join(',') + ')';
+  }
+
+  function seedNoise(seed) {
+    var x = Math.sin(seed * 999) * 43758.5453;
+    return x - Math.floor(x);
+  }
+
+  function paintBackground(w, h, t) {
+    var gradient = ctx.createLinearGradient(0, 0, w, h);
+    gradient.addColorStop(0, t.bg1);
+    gradient.addColorStop(1, t.bg2);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.save();
+    if (selectedTheme === 'olive') {
+      ctx.fillStyle = t.deep;
+      ctx.beginPath();
+      ctx.moveTo(w * .63, 0);
+      ctx.bezierCurveTo(w * .58, h * .28, w * .82, h * .40, w, h * .34);
+      ctx.lineTo(w, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = .11;
+      ctx.fillStyle = t.ink;
+      for (var i = 0; i < 7; i++) {
+        ctx.beginPath();
+        ctx.ellipse(w * (.73 + i * .042), h * (.07 + i * .046), w * .07, h * .018, -.55, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (selectedTheme === 'dawn') {
+      var sun = ctx.createRadialGradient(w * .78, h * .18, 10, w * .78, h * .18, w * .45);
+      sun.addColorStop(0, 'rgba(255,239,209,.75)');
+      sun.addColorStop(1, 'rgba(255,239,209,0)');
+      ctx.fillStyle = sun;
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(92,47,44,.15)';
+      ctx.lineWidth = Math.max(2, w * .002);
+      for (var d = 0; d < 5; d++) {
+        ctx.beginPath();
+        ctx.moveTo(-w * .08, h * (.72 + d * .07));
+        ctx.bezierCurveTo(w * .28, h * (.61 + d * .06), w * .58, h * (.82 + d * .03), w * 1.08, h * (.68 + d * .06));
+        ctx.stroke();
+      }
+    } else if (selectedTheme === 'midnight') {
+      var glow = ctx.createRadialGradient(w * .72, h * .2, 0, w * .72, h * .2, w * .55);
+      glow.addColorStop(0, 'rgba(84,124,155,.55)');
+      glow.addColorStop(1, 'rgba(9,17,29,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = 'rgba(246,226,174,.55)';
+      for (var s = 0; s < 34; s++) {
+        var sx = seedNoise(s + 5) * w;
+        var sy = seedNoise(s + 29) * h * .62;
+        var sr = Math.max(1.5, w * (.0008 + seedNoise(s + 51) * .0016));
+        ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
+      }
+    } else if (selectedTheme === 'paper') {
+      ctx.globalAlpha = .12;
+      ctx.fillStyle = t.deep;
+      for (var p = 0; p < 420; p++) {
+        var px = seedNoise(p + 2) * w, py = seedNoise(p + 311) * h;
+        ctx.fillRect(px, py, Math.max(1, w * .0012), Math.max(1, w * .0012));
+      }
+      ctx.globalAlpha = .16;
+      ctx.strokeStyle = t.accent;
+      ctx.lineWidth = Math.max(1.5, w * .0014);
+      ctx.beginPath();
+      ctx.arc(w * .86, h * .12, w * .17, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(w * .86, h * .12, w * .12, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (selectedTheme === 'rose') {
+      ctx.globalAlpha = .18;
+      ctx.strokeStyle = t.ink;
+      ctx.lineWidth = Math.max(2, w * .0022);
+      for (var r = 0; r < 5; r++) {
+        ctx.beginPath();
+        ctx.arc(w * .83, h * .15, w * (.08 + r * .035), .2 + r * .18, Math.PI * 1.5 + r * .12);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = .1;
+      ctx.fillStyle = t.ink;
+      ctx.beginPath();
+      ctx.ellipse(w * .08, h * .86, w * .34, h * .12, -.48, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = t.light ? .04 : .055;
+    ctx.fillStyle = t.light ? '#3c2e22' : '#ffffff';
+    for (var n = 0; n < 520; n++) {
+      var nx = seedNoise(n + 89) * w, ny = seedNoise(n + 501) * h;
+      var nr = seedNoise(n + 701) * 1.8 + .4;
+      ctx.fillRect(nx, ny, nr, nr);
+    }
+    ctx.restore();
+  }
+
+  function tokenize(text) {
+    return text.trim().replace(/\s+/g, ' ').split(' ').filter(Boolean);
+  }
+
+  function wrapText(text, fontSize, maxWidth, family) {
+    ctx.font = '400 ' + fontSize + 'px ' + family;
+    var words = tokenize(text);
+    var lines = [];
+    var line = '';
+    words.forEach(function(word) {
+      var trial = line ? line + ' ' + word : word;
+      if (ctx.measureText(trial).width > maxWidth && line) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = trial;
+      }
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function getLayout(w, h, text, family) {
+    var isWide = w / h > 1.3;
+    var maxWidth = isWide ? w * .58 : w * .76;
+    if (format.value === 'story') maxWidth = w * .74;
+    var maxTextHeight = isWide ? h * .46 : h * .50;
+    var size = Math.round(Math.min(w, h) * (text.length < 90 ? .071 : text.length < 190 ? .057 : .047));
+    var minSize = Math.round(Math.min(w, h) * .029);
+    var lines, lineHeight;
+    do {
+      lines = wrapText(text, size, maxWidth, family);
+      lineHeight = size * 1.38;
+      if (lines.length * lineHeight <= maxTextHeight) break;
+      size -= 2;
+    } while (size > minSize);
+    return { size: size, lineHeight: lineHeight, lines: lines, maxWidth: maxWidth };
+  }
+
+  function drawTextBlock(w, h, t) {
+    var text = verse.value.trim() || 'Enter a verse to begin.';
+    var ref = reference.value.trim();
+    var note = translation.value.trim();
+    var family = fontStyle.value === 'classic' ? '"Libre Baskerville", Georgia, serif' : '"Manrope", sans-serif';
+    var layout = getLayout(w, h, text, family);
+    var isWide = w / h > 1.3;
+    var contentWidth = layout.maxWidth;
+    var blockHeight = layout.lines.length * layout.lineHeight;
+    var startY = isWide ? h * .28 : (h - blockHeight) * .46;
+    if (format.value === 'story') startY = (h - blockHeight) * .43;
+    var anchorX = alignment === 'left' ? (w - contentWidth) / 2 : alignment === 'right' ? (w + contentWidth) / 2 : w / 2;
+
+    ctx.save();
+    ctx.fillStyle = t.ink;
+    ctx.textAlign = alignment;
+    ctx.textBaseline = 'alphabetic';
+
+    var markSize = layout.size * 1.55;
+    ctx.globalAlpha = .35;
+    ctx.font = '400 ' + markSize + 'px Georgia, serif';
+    ctx.fillText('“', anchorX, startY - layout.size * .55);
+    ctx.globalAlpha = 1;
+
+    ctx.font = '400 ' + layout.size + 'px ' + family;
+    layout.lines.forEach(function(line, i) {
+      ctx.fillText(line, anchorX, startY + (i + 1) * layout.lineHeight);
+    });
+
+    var ruleY = startY + blockHeight + layout.size * .9;
+    var ruleLength = Math.min(w * .11, 110);
+    ctx.fillStyle = t.accent;
+    if (alignment === 'left') ctx.fillRect(anchorX, ruleY, ruleLength, Math.max(3, w * .004));
+    if (alignment === 'center') ctx.fillRect(anchorX - ruleLength / 2, ruleY, ruleLength, Math.max(3, w * .004));
+    if (alignment === 'right') ctx.fillRect(anchorX - ruleLength, ruleY, ruleLength, Math.max(3, w * .004));
+
+    var refSize = Math.max(24, Math.round(layout.size * .38));
+    ctx.fillStyle = t.ink;
+    ctx.font = '700 ' + refSize + 'px "DM Sans", sans-serif';
+    var refY = ruleY + refSize * 2.15;
+    ctx.fillText(ref || 'VERSE REFERENCE', anchorX, refY);
+
+    if (note) {
+      ctx.globalAlpha = .68;
+      ctx.font = '600 ' + Math.max(18, Math.round(refSize * .66)) + 'px "DM Sans", sans-serif';
+      ctx.fillText(note.toUpperCase(), anchorX, refY + refSize * 1.25);
+    }
+    ctx.restore();
+  }
+
+  function draw() {
+    var wh = sizes[format.value];
+    if (canvas.width !== wh[0] || canvas.height !== wh[1]) {
+      canvas.width = wh[0];
+      canvas.height = wh[1];
+    }
+    var t = themes[selectedTheme];
+    paintBackground(wh[0], wh[1], t);
+    drawTextBlock(wh[0], wh[1], t);
+    dimensions.textContent = wh[0] + ' × ' + wh[1] + ' PNG';
+    charCount.textContent = verse.value.length + (verse.value.length === 1 ? ' character' : ' characters');
+  }
+
+  function scheduleDraw() {
+    clearTimeout(drawTimer);
+    drawTimer = setTimeout(draw, 45);
+    status.textContent = '';
+  }
+
+  [verse, reference, translation, format, fontStyle].forEach(function(el) {
+    el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', scheduleDraw);
+  });
+
+  document.querySelectorAll('.theme').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      selectedTheme = btn.getAttribute('data-theme');
+      document.querySelectorAll('.theme').forEach(function(b) { b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
+      draw();
+      status.textContent = '';
+    });
+  });
+
+  document.querySelectorAll('[data-align]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      alignment = btn.getAttribute('data-align');
+      document.querySelectorAll('[data-align]').forEach(function(b) { b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
+      draw();
+    });
+  });
+
+  document.getElementById('download').addEventListener('click', function() {
+    draw();
+    canvas.toBlob(function(blob) {
+      if (!blob) {
+        status.textContent = 'The image could not be prepared. Please try again.';
+        return;
+      }
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      var name = reference.value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'verse-image';
+      a.href = url;
+      a.download = name + '.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1200);
+      status.textContent = 'PNG downloaded — ready to share.';
+    }, 'image/png');
+  });
+
+  document.getElementById('reset').addEventListener('click', function() {
+    selectedTheme = 'olive';
+    alignment = 'left';
+    format.value = 'square';
+    fontStyle.value = 'classic';
+    document.querySelectorAll('.theme').forEach(function(b) { b.setAttribute('aria-pressed', b.getAttribute('data-theme') === 'olive' ? 'true' : 'false'); });
+    document.querySelectorAll('[data-align]').forEach(function(b) { b.setAttribute('aria-pressed', b.getAttribute('data-align') === 'left' ? 'true' : 'false'); });
+    draw();
+    status.textContent = 'Design reset. Your verse text was kept.';
+  });
+
+  var fontReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+  fontReady.then(draw);
+  draw();
+})();
+</script>
+</body>
+</html>
