@@ -92,6 +92,30 @@
     }
     .steps span { display: flex; align-items: center; gap: 7px; }
     .steps span:not(:last-child)::after { content: "—"; color: var(--line); }
+    .intro-side {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
+    }
+    .home-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--soft-shadow);
+      font-size: .83rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background .16s;
+    }
+    .home-pill:hover { background: var(--surface-2); }
+    .home-pill:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
     .workspace {
       display: grid;
       grid-template-columns: minmax(330px, 430px) minmax(0, 1fr);
@@ -287,6 +311,8 @@
     @media (max-width: 900px) {
       .page { padding-top: 28px; }
       .intro { display: block; }
+      .intro-side { align-items: flex-start; margin-top: 16px; }
+      .intro-side .steps { margin-top: 0; }
       .steps { margin-top: 16px; }
       .workspace { grid-template-columns: 1fr; }
       .preview-area { order: -1; }
@@ -318,8 +344,11 @@
         <h1>Turn a verse into something worth sharing.</h1>
         <p>Set the words, choose a mood, and download a crisp image for messages or social posts.</p>
       </div>
-      <div class="steps" aria-label="Three steps">
-        <span>Write</span><span>Style</span><span>Download</span>
+      <div class="intro-side">
+        <a class="home-pill" href="https://jesuslovestyler.com/">⌂ Home</a>
+        <div class="steps" aria-label="Three steps">
+          <span>Write</span><span>Style</span><span>Download</span>
+        </div>
       </div>
     </header>
 
@@ -718,5 +747,6 @@
   draw();
 })();
 </script>
+<script data-goatcounter="https://jesuslovestyler.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
